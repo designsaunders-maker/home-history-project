@@ -221,3 +221,4 @@ The backend includes debug logging for photo uploads. Check the console for:
 - **Bandwidth**: Included in free tier for most use cases
 
 The photo upload functionality is now fully integrated and ready for use!
+
