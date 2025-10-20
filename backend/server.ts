@@ -7,6 +7,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth';
 import propertyRoutes from './routes/propertyRoutes';
 import uploadRoutes from './routes/upload';
+import enrichAddressRoutes from './routes/enrichAddress';
 
 const app = express();
 
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/home-history')
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/enrich-address', enrichAddressRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
