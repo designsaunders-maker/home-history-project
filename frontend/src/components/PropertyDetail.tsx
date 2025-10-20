@@ -142,7 +142,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
               <div className="flex items-center gap-2 mb-4">
                 <MessageCircle className="w-5 h-5 text-gray-600" />
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {property.memories.length} Memory{property.memories.length !== 1 ? 'ies' : ''}
+                  {property.memories.length} {property.memories.length !== 1 ? 'Memories' : 'Memory'}
                 </h3>
               </div>
               
