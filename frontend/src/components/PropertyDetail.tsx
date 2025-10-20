@@ -1,7 +1,6 @@
 import React from 'react';
 import { X, Calendar, User, MessageCircle, Camera, MapPin } from 'lucide-react';
 import { useEnrichedAddress } from '../hooks/useEnrichedAddress';
-import EnrichmentDebugCard from './EnrichmentDebugCard';
 
 interface Memory {
   _id?: string;
@@ -46,6 +45,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
   const addr = property?.address?.trim();
   const { data, loading, error } = useEnrichedAddress(addr || undefined);
   const ac = data?.census?.result?.addressMatches?.[0]?.addressComponents;
+  const stdLine = ac ? `${ac.city || ""}${ac.city ? ", " : ""}${ac.state || ""} ${ac.zip || ""}`.trim() : "";
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -159,23 +159,10 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                     <li><strong>Address:</strong> {data.address}</li>
                     <li><strong>Lat/Lng:</strong> {data.geocode?.[0]?.lat}, {data.geocode?.[0]?.lon}</li>
                     <li><strong>Matched Address (Census):</strong> {data.census?.result?.addressMatches?.[0]?.matchedAddress}</li>
-                    {ac && ac.city && ac.state && ac.zip && (
-                      <li>
-                        <strong>Standardized Address:</strong>{" "}
-                        {`${ac.city}, ${ac.state} ${ac.zip}`}
-                      </li>
-                    )}
+                    {stdLine && <li><strong>Standardized Address:</strong> {stdLine}</li>}
                   </ul>
                 )}
               </section>
-
-              {/* Debug Card - renders unconditionally to show state */}
-              <EnrichmentDebugCard 
-                address={addr}
-                loading={loading}
-                error={error}
-                data={data}
-              />
 
               <div className="flex items-center gap-2 mb-4">
                 <MessageCircle className="w-5 h-5 text-gray-600" />
