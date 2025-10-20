@@ -39,7 +39,12 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
   onClose, 
   onAddMemory 
 }) => {
-  const { data, loading, error } = useEnrichedAddress(property.address);
+  // Debug logging
+  console.debug("[PropertyDetail] mounted with address:", property?.address);
+  
+  // Guard against empty address
+  const addr = property?.address?.trim();
+  const { data, loading, error } = useEnrichedAddress(addr || undefined);
   const ac = data?.census?.result?.addressMatches?.[0]?.addressComponents;
 
   const formatDate = (dateString: string) => {
@@ -164,9 +169,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                 )}
               </section>
 
-              {/* Debug Card */}
+              {/* Debug Card - renders unconditionally to show state */}
               <EnrichmentDebugCard 
-                address={property.address}
+                address={addr}
                 loading={loading}
                 error={error}
                 data={data}
