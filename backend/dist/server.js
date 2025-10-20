@@ -11,6 +11,7 @@ const cors_1 = __importDefault(require("cors"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const propertyRoutes_1 = __importDefault(require("./routes/propertyRoutes"));
 const upload_1 = __importDefault(require("./routes/upload"));
+const enrichAddress_1 = __importDefault(require("./routes/enrichAddress"));
 const app = (0, express_1.default)();
 // Middleware
 app.use((0, cors_1.default)());
@@ -23,6 +24,7 @@ mongoose_1.default.connect(process.env.MONGODB_URI || 'mongodb://localhost/home-
 app.use('/api/auth', auth_1.default);
 app.use('/api/properties', propertyRoutes_1.default);
 app.use('/api/upload', upload_1.default);
+app.use('/api/enrich-address', enrichAddress_1.default);
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

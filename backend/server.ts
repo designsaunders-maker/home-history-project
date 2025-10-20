@@ -12,7 +12,10 @@ import enrichAddressRoutes from './routes/enrichAddress';
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["https://home-history-project.vercel.app", /\.vercel\.app$/],
+  credentials: false
+}));
 app.use(express.json());
 
 // Connect to MongoDB

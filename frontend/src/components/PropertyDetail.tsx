@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar, User, MessageCircle, Camera, MapPin } from 'lucide-react';
 import { useEnrichedAddress } from '../hooks/useEnrichedAddress';
+import EnrichmentDebugCard from './EnrichmentDebugCard';
 
 interface Memory {
   _id?: string;
@@ -162,6 +163,14 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                   </ul>
                 )}
               </section>
+
+              {/* Debug Card */}
+              <EnrichmentDebugCard 
+                address={property.address}
+                loading={loading}
+                error={error}
+                data={data}
+              />
 
               <div className="flex items-center gap-2 mb-4">
                 <MessageCircle className="w-5 h-5 text-gray-600" />
