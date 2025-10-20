@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Upload, UserCheck, X, Calendar, FileText, Home, MessageCircle } from 'lucide-react';
 import api from '../../api/client';
+import { useEnrichedAddress } from '../../hooks/useEnrichedAddress';
 
 interface PropertyClaimModalProps {
   address: string;
@@ -23,6 +24,16 @@ const PropertyClaimModal: React.FC<PropertyClaimModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  // Use enrichment for address context
+  const modalAddress = (existingProperty?.address || address || "").trim();
+  const { data, loading, error: enrichError } = useEnrichedAddress(modalAddress || undefined);
+  
+  // Derive standardized fields
+  const ac = data?.census?.result?.addressMatches?.[0]?.addressComponents;
+  const stdLine = ac ? `${ac.city || ""}${ac.city ? ", " : ""}${ac.state || ""} ${ac.zip || ""}`.trim() : "";
+  const lat = data?.geocode?.[0]?.lat;
+  const lon = data?.geocode?.[0]?.lon;
 
   const [memoryData, setMemoryData] = useState({
     name: '',
@@ -145,6 +156,18 @@ const PropertyClaimModal: React.FC<PropertyClaimModalProps> = ({
               <div>{address}</div>
             </div>
           </div>
+
+          {/* Property Basics (enrichment) */}
+          <section aria-label="Property Basics (enrichment)" style={{marginTop: 12, marginBottom: 8}}>
+            {loading && <div style={{fontSize: 12, opacity: 0.8}}>Fetching property details…</div>}
+            {!loading && !enrichError && (stdLine || (lat && lon)) && (
+              <ul style={{listStyle: "none", padding: 0, margin: 0, fontSize: 14}}>
+                {stdLine && <li><strong>Standardized Address:</strong> {stdLine}</li>}
+                {(lat && lon) && <li><strong>Lat/Lng:</strong> {lat}, {lon}</li>}
+              </ul>
+            )}
+            {enrichError && <div style={{color: "#c00", fontSize: 12}}>Couldn't load details.</div>}
+          </section>
         </div>
 
         {step === 'type' ? (
