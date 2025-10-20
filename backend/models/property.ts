@@ -14,12 +14,24 @@ export interface IMemory {
   submittedAt: Date;
 }
 
+export interface IEnrichment {
+  matchedAddress?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  lat?: number;
+  lon?: number;
+  source: string;
+  enrichedAt: Date;
+}
+
 export interface IProperty extends Document {
   address: string;
   yearBuilt?: number;
   lat: number;
   lng: number;
   memories: IMemory[];
+  enrichment?: IEnrichment;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +55,16 @@ const PropertySchema: Schema = new Schema({
   lat: { type: Number, required: true },
   lng: { type: Number, required: true },
   memories: [MemorySchema],
+  enrichment: {
+    matchedAddress: { type: String },
+    city: { type: String },
+    state: { type: String },
+    zip: { type: String },
+    lat: { type: Number },
+    lon: { type: Number },
+    source: { type: String, default: 'census+osm' },
+    enrichedAt: { type: Date }
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -16,6 +16,17 @@ interface Memory {
   submittedAt: string;
 }
 
+interface Enrichment {
+  matchedAddress?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  lat?: number;
+  lon?: number;
+  source: string;
+  enrichedAt: string;
+}
+
 interface Property {
   _id: string;
   address: string;
@@ -23,6 +34,7 @@ interface Property {
   lat: number;
   lng: number;
   memories: Memory[];
+  enrichment?: Enrichment;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,7 +57,11 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
   const addr = property?.address?.trim();
   const { data, loading, error } = useEnrichedAddress(addr || undefined);
   const ac = data?.census?.result?.addressMatches?.[0]?.addressComponents;
-  const stdLine = ac ? `${ac.city || ""}${ac.city ? ", " : ""}${ac.state || ""} ${ac.zip || ""}`.trim() : "";
+  
+  // Prefer persisted enrichment data from property, fallback to hook data
+  const std = property?.enrichment;
+  const stdLineFromHook = ac ? `${ac.city || ""}${ac.city ? ", " : ""}${ac.state || ""} ${ac.zip || ""}`.trim() : "";
+  const stdUI = std ? `${std.city || ""}${std.city ? ", " : ""}${std.state || ""} ${std.zip || ""}`.trim() : stdLineFromHook;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -157,9 +173,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
                 {data && (
                   <ul className="space-y-2 text-sm">
                     <li><strong>Address:</strong> {data.address}</li>
-                    <li><strong>Lat/Lng:</strong> {data.geocode?.[0]?.lat}, {data.geocode?.[0]?.lon}</li>
-                    <li><strong>Matched Address (Census):</strong> {data.census?.result?.addressMatches?.[0]?.matchedAddress}</li>
-                    {stdLine && <li><strong>Standardized Address:</strong> {stdLine}</li>}
+                    <li><strong>Lat/Lng:</strong> {std?.lat && std?.lon ? `${std.lat}, ${std.lon}` : `${data.geocode?.[0]?.lat}, ${data.geocode?.[0]?.lon}`}</li>
+                    <li><strong>Matched Address (Census):</strong> {std?.matchedAddress || data.census?.result?.addressMatches?.[0]?.matchedAddress}</li>
+                    {stdUI && <li><strong>Standardized Address:</strong> {stdUI}</li>}
                   </ul>
                 )}
               </section>

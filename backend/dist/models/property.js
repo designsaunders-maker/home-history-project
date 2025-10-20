@@ -52,6 +52,16 @@ const PropertySchema = new mongoose_1.Schema({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
     memories: [MemorySchema],
+    enrichment: {
+        matchedAddress: { type: String },
+        city: { type: String },
+        state: { type: String },
+        zip: { type: String },
+        lat: { type: Number },
+        lon: { type: Number },
+        source: { type: String, default: 'census+osm' },
+        enrichedAt: { type: Date }
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });

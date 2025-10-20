@@ -12,9 +12,13 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const propertyRoutes_1 = __importDefault(require("./routes/propertyRoutes"));
 const upload_1 = __importDefault(require("./routes/upload"));
 const enrichAddress_1 = __importDefault(require("./routes/enrichAddress"));
+const adminEnrichment_1 = __importDefault(require("./routes/adminEnrichment"));
 const app = (0, express_1.default)();
 // Middleware
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: ["https://home-history-project.vercel.app", /\.vercel\.app$/],
+    credentials: false
+}));
 app.use(express_1.default.json());
 // Connect to MongoDB
 mongoose_1.default.connect(process.env.MONGODB_URI || 'mongodb://localhost/home-history')
@@ -25,6 +29,7 @@ app.use('/api/auth', auth_1.default);
 app.use('/api/properties', propertyRoutes_1.default);
 app.use('/api/upload', upload_1.default);
 app.use('/api/enrich-address', enrichAddress_1.default);
+app.use('/api/admin/enrich', adminEnrichment_1.default);
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

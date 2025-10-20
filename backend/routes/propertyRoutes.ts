@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import Property, { IProperty, IMemory } from '../models/property';
+import { enrichAddressNormalized, isEnrichmentStale } from '../services/enrichmentService';
 
 const router = express.Router();
 
@@ -34,12 +35,16 @@ router.post('/', async (req: Request, res: Response) => {
       submittedAt: new Date()
     };
     
+    // Enrich the address before saving
+    const enrichment = await enrichAddressNormalized(address);
+    
     const newProperty: IProperty = new Property({
       address,
       lat,
       lng,
       yearBuilt,
-      memories: [newMemory]
+      memories: [newMemory],
+      enrichment
     });
     
     const savedProperty = await newProperty.save();
@@ -143,13 +148,22 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// Get a specific property
+// Get a specific property (with lazy enrichment refresh)
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const property = await Property.findById(req.params.id);
+    let property = await Property.findById(req.params.id);
     if (!property) {
       return res.status(404).json({ message: 'Property not found' });
     }
+    
+    // Check if enrichment is stale and refresh if needed
+    if (isEnrichmentStale(property.enrichment?.enrichedAt)) {
+      console.log(`[PropertyRoutes] Enrichment stale for property ${property._id}, refreshing...`);
+      const enrichment = await enrichAddressNormalized(property.address);
+      property.enrichment = enrichment;
+      property = await property.save();
+    }
+    
     res.json(property);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching property', error });

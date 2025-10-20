@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const property_1 = __importDefault(require("../models/property"));
+const enrichmentService_1 = require("../services/enrichmentService");
 const router = express_1.default.Router();
 // Create a new property with initial memory
 router.post('/', async (req, res) => {
@@ -34,12 +35,15 @@ router.post('/', async (req, res) => {
             },
             submittedAt: new Date()
         };
+        // Enrich the address before saving
+        const enrichment = await (0, enrichmentService_1.enrichAddressNormalized)(address);
         const newProperty = new property_1.default({
             address,
             lat,
             lng,
             yearBuilt,
-            memories: [newMemory]
+            memories: [newMemory],
+            enrichment
         });
         const savedProperty = await newProperty.save();
         console.log('Saved property:', savedProperty);
@@ -132,12 +136,19 @@ router.get('/', async (req, res) => {
         res.status(500).json({ message: 'Error fetching properties', error });
     }
 });
-// Get a specific property
+// Get a specific property (with lazy enrichment refresh)
 router.get('/:id', async (req, res) => {
     try {
-        const property = await property_1.default.findById(req.params.id);
+        let property = await property_1.default.findById(req.params.id);
         if (!property) {
             return res.status(404).json({ message: 'Property not found' });
+        }
+        // Check if enrichment is stale and refresh if needed
+        if ((0, enrichmentService_1.isEnrichmentStale)(property.enrichment?.enrichedAt)) {
+            console.log(`[PropertyRoutes] Enrichment stale for property ${property._id}, refreshing...`);
+            const enrichment = await (0, enrichmentService_1.enrichAddressNormalized)(property.address);
+            property.enrichment = enrichment;
+            property = await property.save();
         }
         res.json(property);
     }
