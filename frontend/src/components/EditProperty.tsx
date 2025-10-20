@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/client';
 
 interface PropertyData {
   _id: string;
@@ -32,7 +32,8 @@ const EditProperty: React.FC<EditPropertyProps> = ({ property, onClose, onUpdate
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/properties/${property._id}`, editedProperty);      onClose();
+      const response = await api.put(`/api/properties/${property._id}`, editedProperty);
+      onClose();
     } catch (error) {
       console.error('Error updating property:', error);
       alert('Failed to update property. Please try again.');

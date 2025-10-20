@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/client';
 
 interface AddPropertyProps {
   onPropertyAdded: () => void;
@@ -18,7 +18,7 @@ const AddProperty: React.FC<AddPropertyProps> = ({ onPropertyAdded, onClose }) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/properties`, {
+      await api.post('/api/properties', {
         ...formData,
         yearBuilt: parseInt(formData.yearBuilt)
       });

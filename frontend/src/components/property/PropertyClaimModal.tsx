@@ -1,7 +1,7 @@
 // src/components/property/PropertyClaimModal.tsx
 import React, { useState } from 'react';
 import { Upload, UserCheck, X, Calendar, FileText, Home, MessageCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../../api/client';
 
 interface PropertyClaimModalProps {
   address: string;
@@ -48,7 +48,7 @@ const PropertyClaimModal: React.FC<PropertyClaimModalProps> = ({
       const formData = new FormData();
       formData.append('photo', file);
       
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/upload`, formData, {
+      const response = await api.post('/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -82,7 +82,7 @@ const PropertyClaimModal: React.FC<PropertyClaimModalProps> = ({
       }
 
       // Use the new memory endpoint that handles finding/creating properties
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/properties/memories`, {
+      await api.post('/api/properties/memories', {
         address,
         lat: location.lat,
         lng: location.lng,

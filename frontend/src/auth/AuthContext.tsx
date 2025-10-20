@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../api/client';
 
 interface AuthContextType {
   user: User | null;
@@ -46,17 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
-  const handleAuthResponse = async (response: Response) => {
-    if (!response.ok) {
-      const error = await response.json();
-      const authError = new Error(error.message || 'Authentication failed') as AuthError;
-      authError.code = error.code;
-      authError.details = error.details;
-      throw authError;
-    }
-    
-    const data = await response.json();
-    
+  const handleAuthResponse = (data: any) => {
     // Store the token if it's in the response
     if (data.token) {
       localStorage.setItem('token', data.token);
@@ -67,13 +58,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (userData: RegisterData) => {
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await handleAuthResponse(response);
+      const response = await api.post('/api/auth/register', userData);
+      const data = handleAuthResponse(response.data);
       // Optionally auto-login after registration
       // setUser(data.user);
     } catch (error) {
@@ -84,13 +70,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await handleAuthResponse(response);
+      const response = await api.post('/api/auth/login', { email, password });
+      const data = handleAuthResponse(response.data);
       setUser(data.user);
     } catch (error) {
       console.error('Login failed:', error);
@@ -144,22 +125,27 @@ export const useAuth = () => {
   return context;
 };
 
-// Optional: Add an authenticated fetch utility
-export const authFetch = async (url: string, options: RequestInit = {}) => {
+// Optional: Add an authenticated API request utility
+export const authApi = async (method: 'get' | 'post' | 'put' | 'delete', url: string, data?: any) => {
   const token = localStorage.getItem('token');
-  const headers = {
-    ...options.headers,
-    'Authorization': `Bearer ${token}`,
-  };
-
-  const response = await fetch(url, { ...options, headers });
   
-  if (response.status === 401) {
-    // Handle token expiration
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-    throw new Error('Session expired');
+  try {
+    const response = await api({
+      method,
+      url,
+      data,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    });
+    return response;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      // Handle token expiration
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      throw new Error('Session expired');
+    }
+    throw error;
   }
-  
-  return response;
 };

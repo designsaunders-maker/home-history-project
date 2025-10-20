@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Home } from 'lucide-react';
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
-import axios from 'axios';
+import api from '../api/client';
 import SearchBar from './SearchBar';
 import PropertyDetail from './PropertyDetail';
 import PropertyClaimModal from './property/PropertyClaimModal';
@@ -78,7 +78,7 @@ const SearchFirstInterface: React.FC<SearchFirstInterfaceProps> = ({
     setLoadingProperties(true);
     try {
       // Using the new nearby endpoint
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/properties/nearby`, {
+      const response = await api.post('/api/properties/nearby', {
         lat: center.lat,
         lng: center.lng,
         radius: 1 // 1 mile radius
@@ -90,7 +90,7 @@ const SearchFirstInterface: React.FC<SearchFirstInterfaceProps> = ({
       console.error('Error fetching nearby properties:', error);
       // Fallback to client-side filtering if backend endpoint fails
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/properties`);
+        const response = await api.get('/api/properties');
         const allProperties = response.data;
         
         const filteredProperties = allProperties.filter((property: PropertyData) => {

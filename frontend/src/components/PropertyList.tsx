@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/client';
 import EditProperty from './EditProperty';
 import PropertyMap from './PropertyMap';
 import AddProperty from './AddProperty';
@@ -25,7 +25,7 @@ const PropertyList: React.FC = () => {
 
   const fetchProperties = async () => {
     try {
-      const response = await axios.get<PropertyData[]>(`${process.env.REACT_APP_API_URL}/api/properties`);
+      const response = await api.get<PropertyData[]>('/api/properties');
       setProperties(response.data);
     } catch (error) {
       console.error('Error fetching properties:', error);
