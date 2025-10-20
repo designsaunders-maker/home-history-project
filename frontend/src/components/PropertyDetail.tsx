@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Calendar, User, MessageCircle, Camera, MapPin } from 'lucide-react';
+import { useEnrichedAddress } from '../hooks/useEnrichedAddress';
 
 interface Memory {
   _id?: string;
@@ -37,6 +38,9 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
   onClose, 
   onAddMemory 
 }) => {
+  const { data, loading, error } = useEnrichedAddress(property.address);
+  const ac = data?.census?.result?.addressMatches?.[0]?.addressComponents;
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -139,6 +143,26 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Property Basics Section */}
+              <section aria-label="Property basics" style={{marginBottom: 16}}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Property Basics</h3>
+                {loading && <p className="text-gray-600">Loading property details…</p>}
+                {error && <p style={{color: "crimson"}}>Couldn't load details.</p>}
+                {data && (
+                  <ul className="space-y-2 text-sm">
+                    <li><strong>Address:</strong> {data.address}</li>
+                    <li><strong>Lat/Lng:</strong> {data.geocode?.[0]?.lat}, {data.geocode?.[0]?.lon}</li>
+                    <li><strong>Matched Address (Census):</strong> {data.census?.result?.addressMatches?.[0]?.matchedAddress}</li>
+                    {ac && ac.city && ac.state && ac.zip && (
+                      <li>
+                        <strong>Standardized Address:</strong>{" "}
+                        {`${ac.city}, ${ac.state} ${ac.zip}`}
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </section>
+
               <div className="flex items-center gap-2 mb-4">
                 <MessageCircle className="w-5 h-5 text-gray-600" />
                 <h3 className="text-lg font-semibold text-gray-900">
